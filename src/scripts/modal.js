@@ -3,33 +3,32 @@ function closeByButton(evt) {
       closeModal(getActiveModal());
   }
 }
+
 function getActiveModal() {
   return document.querySelector('.popup_is-opened');
 }
+
 function closeByOverlay(evt) {
   if (evt.target.classList.contains('popup')) {
       closeModal(getActiveModal());
   }
 }
+
 function closeByEscape(evt) {
   if (evt.key === 'Escape') {
       closeModal(getActiveModal())
   }
 }
 
-function openModal(modalWindow) {
-
+export function openModal(modalWindow) {
   modalWindow.classList.add('popup_is-opened');
-
   modalWindow.addEventListener('click', closeByButton);
   modalWindow.addEventListener('click', closeByOverlay);
   document.addEventListener('keydown', closeByEscape);
 }
 
 // Закрытие модального окна
-function closeModal(modalWindow) {
-
-
+export function closeModal(modalWindow) {
   modalWindow.classList.remove('popup_is-opened');
 
   modalWindow.removeEventListener('click', closeByButton);
@@ -37,8 +36,12 @@ function closeModal(modalWindow) {
   document.removeEventListener('keydown', closeByEscape);
 }
 
+const popupImage = document.querySelector('.popup_type_image');
+const imagePopup = document.querySelector('.popup__image');
+const paragraphPopup = document.querySelector('.popup__caption');
+
 // Открытие модального окна с параметрами: картинка, текст
-function openCardModal(imageSrc, paragraphText) {
+export function openCardModal(imageSrc, paragraphText) {
   function setImageAttr(imageSrc, paragraphText) {
       imagePopup.src = imageSrc;
       imagePopup.alt = paragraphText;
