@@ -1,8 +1,8 @@
 import '../pages/index.css';
-import {initialCards} from './cards'
-import {openModal} from './modal'
-import {editFormProfile, handleFormSubmit} from "./submits";
-import {applyNewCard, setProfileInfo} from "./applylnDOM";
+import { initialCards } from './cards'
+import { openModal, openCardModal } from './modal'
+import { editFormProfile, handleCardCreationFormSubmit } from "./submits";
+import { applyNewCard, setProfileInfo } from "./applyInDOM";
 // Карточки
 const cardTemplate = document.querySelector('#card-template').content;
 const placesList = document.querySelector('.places__list');
@@ -18,17 +18,24 @@ const profileDescription = document.querySelector('.profile__description');
 
 
 function initialCardsInDOM(dataList) {
-    dataList.forEach((cardData) => applyNewCard(cardData, cardTemplate, placesList));
+    dataList.forEach((cardData) => applyNewCard(
+        cardData,
+        cardTemplate,
+        (src, title) => {
+            // Обработчик открытия карточки в модальном окне
+            openCardModal(src, title)
+        },
+        placesList));
 }
 initialCardsInDOM(initialCards)
 
 addButton.addEventListener('click', () => {
     // Очистка полей ввода перед открытием формы
-    Array.from(formCard.elements).forEach((value => value.value = ""))
+    formCard.reset()
     openModal(popupNewCard);
 });
 
-formCard.addEventListener('submit', (e => handleFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard)));
+formCard.addEventListener('submit', (e => handleCardCreationFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard)));
 editProfileButton.addEventListener('click', () => {
     setProfileInfo(formProfile, profileTitle, profileDescription);
     openModal(popupProfile);

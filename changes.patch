@@ -1,0 +1,242 @@
+diff --git a/src/scripts/applyInDOM.js b/src/scripts/applyInDOM.js
+index f27f8ee..5416d6c 100644
+--- a/src/scripts/applyInDOM.js
++++ b/src/scripts/applyInDOM.js
+@@ -1,13 +1,21 @@
+-import {createCard} from "./createCard";
+-import {openCardModal} from "./modal";
++import { createCard, deleteCard, likeCard } from "./createCard";
+ 
+ export function setProfileInfo(form, title, description) {
+     form.elements.name.value = title.textContent;
+     form.elements.description.value = description.textContent;
+ }
+ 
+-export function applyNewCard(card, cardTemplate, placesList) {
+-    const createdCard = createCard(card, cardTemplate, openCardModal);
++export function applyNewCard(card, cardTemplate, openCardModal, placesList) {
++    const createdCard = createCard(
++        card,
++        cardTemplate,
++        openCardModal,
++        (cardElement) => {
++            //Доп. условия для API, в других коллбеках аналогично
++            deleteCard(cardElement)
++        },
++        likeCard
++    );
+     placesList.append(createdCard);
+ }
+ 
+diff --git a/src/scripts/createCard.js b/src/scripts/createCard.js
+index 2fd1b18..fc042f0 100644
+--- a/src/scripts/createCard.js
++++ b/src/scripts/createCard.js
+@@ -1,12 +1,11 @@
+-function deleteCard(cardElement) {
++export function deleteCard(cardElement) {
+     cardElement.remove();
+ }
+-function likeCard(cardElement) {
+-    const likeButton = cardElement.querySelector('.card__like-button');
++export function likeCard(likeButton) {
+     likeButton.classList.toggle('card__like-button_is-active');
+ }
+ 
+-export function createCard(imageAttr, cardTemplate, openCardModal) {
++export function createCard(imageAttr, cardTemplate, openCardModal, deleteCallback, likeCallback) {
+     const cardElement = cardTemplate.querySelector('.places__item.card').cloneNode(true);
+     const cardTitle = cardElement.querySelector('.card__title');
+     const cardImage = cardElement.querySelector('.card__image');
+@@ -19,7 +18,7 @@ export function createCard(imageAttr, cardTemplate, openCardModal) {
+ 
+     // Удаление карточки
+     deleteButton.addEventListener('click', () => {
+-        deleteCard(cardElement)
++        deleteCallback(cardElement)
+     });
+     // Открытие модального окна с просмотром карточки
+     cardImage.addEventListener('click', () => {
+@@ -27,7 +26,7 @@ export function createCard(imageAttr, cardTemplate, openCardModal) {
+     })
+     // Обработчик нажатия на лайк
+     likeButton.addEventListener('click', () => {
+-        likeCard(cardElement)
++        likeCallback(likeButton)
+     });
+     return cardElement
+ }
+\ No newline at end of file
+diff --git a/src/scripts/index.js b/src/scripts/index.js
+index 021ba00..393768d 100644
+--- a/src/scripts/index.js
++++ b/src/scripts/index.js
+@@ -1,8 +1,8 @@
+ import '../pages/index.css';
+-import {initialCards} from './cards'
+-import {openModal} from './modal'
+-import {editFormProfile, handleFormSubmit} from "./submits";
+-import {applyNewCard, setProfileInfo} from "./applyInDOM";
++import { initialCards } from './cards'
++import { openModal, openCardModal } from './modal'
++import { editFormProfile, handleCardCreationFormSubmit } from "./submits";
++import { applyNewCard, setProfileInfo } from "./applyInDOM";
+ // Карточки
+ const cardTemplate = document.querySelector('#card-template').content;
+ const placesList = document.querySelector('.places__list');
+@@ -18,17 +18,24 @@ const profileDescription = document.querySelector('.profile__description');
+ 
+ 
+ function initialCardsInDOM(dataList) {
+-    dataList.forEach((cardData) => applyNewCard(cardData, cardTemplate, placesList));
++    dataList.forEach((cardData) => applyNewCard(
++        cardData,
++        cardTemplate,
++        (src, title) => {
++            // Обработчик открытия карточки в модальном окне
++            openCardModal(src, title)
++        },
++        placesList));
+ }
+ initialCardsInDOM(initialCards)
+ 
+ addButton.addEventListener('click', () => {
+     // Очистка полей ввода перед открытием формы
+-    Array.from(formCard.elements).forEach((value => value.value = ""))
++    formCard.reset()
+     openModal(popupNewCard);
+ });
+ 
+-formCard.addEventListener('submit', (e => handleFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard)));
++formCard.addEventListener('submit', (e => handleCardCreationFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard)));
+ editProfileButton.addEventListener('click', () => {
+     setProfileInfo(formProfile, profileTitle, profileDescription);
+     openModal(popupProfile);
+diff --git a/src/scripts/modal.js b/src/scripts/modal.js
+index 7a66d99..e67a75c 100644
+--- a/src/scripts/modal.js
++++ b/src/scripts/modal.js
+@@ -1,6 +1,14 @@
+-function closeByButton(evt) {
+-    if (evt.target.classList.contains('popup__close')) {
+-        closeModal(getActiveModal());
++function closeModalByMouseClick(evt) {
++    if (
++        // Берем обработчик на всплытии.
++        // Контейнеры попапа все имеют класс popup, поэтому регистрируем
++        // закрытие попапа
++        evt.target.classList.contains('popup')
++        // Если таргетом клика была кнопка Х, закрываем попап
++        || evt.target.classList.contains('popup__close')) {
++        // Т.к. повесили обработчик на модальное окно, при бабблинге
++        // в currentTarget будет всегда оно
++        closeModal(evt.currentTarget);
+     }
+ }
+ 
+@@ -8,12 +16,6 @@ function getActiveModal() {
+     return document.querySelector('.popup_is-opened');
+ }
+ 
+-function closeByOverlay(evt) {
+-    if (evt.target.classList.contains('popup')) {
+-        closeModal(getActiveModal());
+-    }
+-}
+-
+ function closeByEscape(evt) {
+     if (evt.key === 'Escape') {
+         closeModal(getActiveModal())
+@@ -22,8 +24,7 @@ function closeByEscape(evt) {
+ 
+ export function openModal(modalWindow) {
+     modalWindow.classList.add('popup_is-opened');
+-    modalWindow.addEventListener('click', closeByButton);
+-    modalWindow.addEventListener('click', closeByOverlay);
++    modalWindow.addEventListener('click', closeModalByMouseClick);
+     document.addEventListener('keydown', closeByEscape);
+ }
+ 
+@@ -31,8 +32,7 @@ export function openModal(modalWindow) {
+ export function closeModal(modalWindow) {
+     modalWindow.classList.remove('popup_is-opened');
+ 
+-    modalWindow.removeEventListener('click', closeByButton);
+-    modalWindow.removeEventListener('click', closeByOverlay);
++    modalWindow.removeEventListener('click', closeModalByMouseClick);
+     document.removeEventListener('keydown', closeByEscape);
+ }
+ 
+@@ -42,12 +42,9 @@ const paragraphPopup = document.querySelector('.popup__caption');
+ 
+ // Открытие модального окна с параметрами: картинка, текст
+ export function openCardModal(imageSrc, paragraphText) {
+-    function setImageAttr(imageSrc, paragraphText) {
+-        imagePopup.src = imageSrc;
+-        imagePopup.alt = paragraphText;
+-        paragraphPopup.textContent = paragraphText;
+-    }
++    imagePopup.src = imageSrc;
++    imagePopup.alt = paragraphText;
++    paragraphPopup.textContent = paragraphText;
+ 
+-    setImageAttr(imageSrc, paragraphText);
+     openModal(popupImage);
+ }
+\ No newline at end of file
+diff --git a/src/scripts/submits.js b/src/scripts/submits.js
+index d1577fa..6f43a02 100644
+--- a/src/scripts/submits.js
++++ b/src/scripts/submits.js
+@@ -1,15 +1,22 @@
+-import {createCard} from "./createCard";
++import {createCard, deleteCard, likeCard} from "./createCard";
+ import {closeModal, openCardModal} from "./modal";
+ import {setProfileName} from "./applyInDOM";
+ 
+-export function handleFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard) {
++export function handleCardCreationFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard) {
+     evt.preventDefault();
+     const cardInfo =
+         {
+             name: formCard.elements['place-name'].value,
+             link: formCard.elements.link.value
+         };
+-    const createdCard = createCard(cardInfo, cardTemplate, openCardModal);
++    const createdCard = createCard(
++        cardInfo,
++        cardTemplate,
++        openCardModal,
++        deleteCard,
++        likeCard
++    );
++
+     placesList.prepend(createdCard);
+     closeModal(popupNewCard);
+ }
+diff --git a/webpack.config.js b/webpack.config.js
+index ea3813e..cb1e1b5 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -32,9 +32,19 @@ module.exports = {
+                 use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
+             },
+             {
+-                test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
++                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                 type: 'asset/resource',
+-            },
++                generator: {
++                  filename: 'images/[name].[hash][ext]',
++                }
++              },
++              {
++                test: /\.(woff(2)?|eot|ttf|otf)$/i,
++                type: 'asset/resource',
++                generator: {
++                  filename: 'fonts/[name].[hash][ext]',
++                }
++              }
+         ],
+     },
+ 

@@ -1,12 +1,11 @@
-function deleteCard(cardElement) {
+export function deleteCard(cardElement) {
     cardElement.remove();
 }
-function likeCard(cardElement) {
-    const likeButton = cardElement.querySelector('.card__like-button');
+export function likeCard(likeButton) {
     likeButton.classList.toggle('card__like-button_is-active');
 }
 
-export function createCard(imageAttr, cardTemplate, openCardModal) {
+export function createCard(imageAttr, cardTemplate, openCardModal, deleteCallback, likeCallback) {
     const cardElement = cardTemplate.querySelector('.places__item.card').cloneNode(true);
     const cardTitle = cardElement.querySelector('.card__title');
     const cardImage = cardElement.querySelector('.card__image');
@@ -19,7 +18,7 @@ export function createCard(imageAttr, cardTemplate, openCardModal) {
 
     // Удаление карточки
     deleteButton.addEventListener('click', () => {
-        deleteCard(cardElement)
+        deleteCallback(cardElement)
     });
     // Открытие модального окна с просмотром карточки
     cardImage.addEventListener('click', () => {
@@ -27,7 +26,7 @@ export function createCard(imageAttr, cardTemplate, openCardModal) {
     })
     // Обработчик нажатия на лайк
     likeButton.addEventListener('click', () => {
-        likeCard(cardElement)
+        likeCallback(likeButton)
     });
     return cardElement
 }

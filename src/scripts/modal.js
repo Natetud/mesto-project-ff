@@ -1,17 +1,19 @@
-function closeByButton(evt) {
-  if (evt.target.classList.contains('popup__close')) {
-      closeModal(getActiveModal());
+function closeModalByMouseClick(evt) {
+  if (
+      // Берем обработчик на всплытии.
+      // Контейнеры попапа все имеют класс popup, поэтому регистрируем
+      // закрытие попапа
+      evt.target.classList.contains('popup')
+      // Если таргетом клика была кнопка Х, закрываем попап
+      || evt.target.classList.contains('popup__close')) {
+      // Т.к. повесили обработчик на модальное окно, при бабблинге
+      // в currentTarget будет всегда оно
+      closeModal(evt.currentTarget);
   }
 }
 
 function getActiveModal() {
   return document.querySelector('.popup_is-opened');
-}
-
-function closeByOverlay(evt) {
-  if (evt.target.classList.contains('popup')) {
-      closeModal(getActiveModal());
-  }
 }
 
 function closeByEscape(evt) {
@@ -22,8 +24,7 @@ function closeByEscape(evt) {
 
 export function openModal(modalWindow) {
   modalWindow.classList.add('popup_is-opened');
-  modalWindow.addEventListener('click', closeByButton);
-  modalWindow.addEventListener('click', closeByOverlay);
+  modalWindow.addEventListener('click', closeModalByMouseClick);
   document.addEventListener('keydown', closeByEscape);
 }
 
@@ -31,8 +32,7 @@ export function openModal(modalWindow) {
 export function closeModal(modalWindow) {
   modalWindow.classList.remove('popup_is-opened');
 
-  modalWindow.removeEventListener('click', closeByButton);
-  modalWindow.removeEventListener('click', closeByOverlay);
+  modalWindow.removeEventListener('click', closeModalByMouseClick);
   document.removeEventListener('keydown', closeByEscape);
 }
 
@@ -42,12 +42,9 @@ const paragraphPopup = document.querySelector('.popup__caption');
 
 // Открытие модального окна с параметрами: картинка, текст
 export function openCardModal(imageSrc, paragraphText) {
-  function setImageAttr(imageSrc, paragraphText) {
-      imagePopup.src = imageSrc;
-      imagePopup.alt = paragraphText;
-      paragraphPopup.textContent = paragraphText;
-  }
+  imagePopup.src = imageSrc;
+  imagePopup.alt = paragraphText;
+  paragraphPopup.textContent = paragraphText;
 
-  setImageAttr(imageSrc, paragraphText);
   openModal(popupImage);
 }

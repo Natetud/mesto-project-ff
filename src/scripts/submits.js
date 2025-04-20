@@ -1,15 +1,22 @@
-import {createCard} from "./createCard";
+import {createCard, deleteCard, likeCard} from "./createCard";
 import {closeModal, openCardModal} from "./modal";
-import {setProfileName} from "./applylnDOM";
+import {setProfileName} from "./applyInDOM";
 
-export function handleFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard) {
+export function handleCardCreationFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard) {
     evt.preventDefault();
     const cardInfo =
         {
             name: formCard.elements['place-name'].value,
             link: formCard.elements.link.value
         };
-    const createdCard = createCard(cardInfo, cardTemplate, openCardModal);
+    const createdCard = createCard(
+        cardInfo,
+        cardTemplate,
+        openCardModal,
+        deleteCard,
+        likeCard
+    );
+
     placesList.prepend(createdCard);
     closeModal(popupNewCard);
 }
