@@ -1,8 +1,8 @@
 import {createCard, deleteCard, likeCard} from "./createCard";
-import {closeModal, openCardModal} from "./modal";
+import {closeModal} from "./modal";
 import {setProfileName} from "./applyInDOM";
 
-export function handleCardCreationFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard) {
+export function handleCardCreationFormSubmit(evt, formCard, cardTemplate, placesList, popupNewCard, openCardModal) {
     evt.preventDefault();
     const cardInfo =
         {

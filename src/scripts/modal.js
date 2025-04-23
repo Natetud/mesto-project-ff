@@ -35,16 +35,3 @@ export function closeModal(modalWindow) {
   modalWindow.removeEventListener('click', closeModalByMouseClick);
   document.removeEventListener('keydown', closeByEscape);
 }
-
-const popupImage = document.querySelector('.popup_type_image');
-const imagePopup = document.querySelector('.popup__image');
-const paragraphPopup = document.querySelector('.popup__caption');
-
-// Открытие модального окна с параметрами: картинка, текст
-export function openCardModal(imageSrc, paragraphText) {
-  imagePopup.src = imageSrc;
-  imagePopup.alt = paragraphText;
-  paragraphPopup.textContent = paragraphText;
-
-  openModal(popupImage);
-}

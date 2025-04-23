@@ -1,8 +1,8 @@
 import '../pages/index.css';
-import { initialCards } from './cards'
-import { openModal, openCardModal } from './modal'
-import { editFormProfile, handleCardCreationFormSubmit } from "./submits";
-import { applyNewCard, setProfileInfo } from "./applyInDOM";
+import {initialCards} from './cards'
+import {openModal} from './modal'
+import {editFormProfile, handleCardCreationFormSubmit} from "./submits";
+import {applyNewCard, setProfileInfo} from "./applyInDOM";
 // Карточки
 const cardTemplate = document.querySelector('#card-template').content;
 const placesList = document.querySelector('.places__list');
@@ -16,6 +16,9 @@ const popupProfile = document.querySelector('.popup_type_edit');
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
 
+const popupImage = document.querySelector('.popup_type_image');
+const imagePopup = document.querySelector('.popup__image');
+const paragraphPopup = document.querySelector('.popup__caption');
 
 function initialCardsInDOM(dataList) {
     dataList.forEach((cardData) => applyNewCard(
@@ -23,10 +26,14 @@ function initialCardsInDOM(dataList) {
         cardTemplate,
         (src, title) => {
             // Обработчик открытия карточки в модальном окне
-            openCardModal(src, title)
+            imagePopup.src = src;
+            imagePopup.alt = title;
+            paragraphPopup.textContent = title;
+            openModal(popupImage);
         },
         placesList));
 }
+
 initialCardsInDOM(initialCards)
 
 addButton.addEventListener('click', () => {
@@ -35,7 +42,17 @@ addButton.addEventListener('click', () => {
     openModal(popupNewCard);
 });
 
-formCard.addEventListener('submit', (e => handleCardCreationFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard)));
+formCard.addEventListener(
+    'submit',
+    (e => handleCardCreationFormSubmit(e, formCard, cardTemplate, placesList, popupNewCard, (src, title) => {
+            // Обработчик открытия карточки в модальном окне
+            imagePopup.src = src;
+            imagePopup.alt = title;
+            paragraphPopup.textContent = title;
+            openModal(popupImage);
+        })
+    )
+);
 editProfileButton.addEventListener('click', () => {
     setProfileInfo(formProfile, profileTitle, profileDescription);
     openModal(popupProfile);
