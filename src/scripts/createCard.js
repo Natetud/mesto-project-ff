@@ -1,23 +1,29 @@
 import {deleteCardApi, likeCardApi, unlikeCardApi} from "./api";
 
 export function deleteCard(cardElement, cardId) {
-    deleteCardApi(cardId).then(() => {
-        cardElement.remove();
-    }).catch(console.error)
+    deleteCardApi(cardId)
+        .then(() => {
+            cardElement.remove();
+        })
+        .catch(console.error)
 }
 
 export function likeCard(likeButton, likeCounter, cardId) {
-    likeCardApi(cardId).then((res) => {
-        likeButton.classList.add('card__like-button_is-active');
-        likeCounter.textContent = res.likes.length
-    })
+    likeCardApi(cardId)
+        .then((res) => {
+            likeButton.classList.add('card__like-button_is-active');
+            likeCounter.textContent = res.likes.length
+        })
+        .catch(console.error)
 }
 
 export function unlikeCard(likeButton, likeCounter, cardId) {
-    unlikeCardApi(cardId).then((res) => {
-        likeButton.classList.remove('card__like-button_is-active');
-        likeCounter.textContent = res.likes.length
-    }).catch(console.error)
+    unlikeCardApi(cardId)
+        .then((res) => {
+            likeButton.classList.remove('card__like-button_is-active');
+            likeCounter.textContent = res.likes.length
+        })
+        .catch(console.error)
 }
 
 export function createCard(imageAttr, cardTemplate, openCardModal, userId) {
@@ -43,8 +49,7 @@ export function createCard(imageAttr, cardTemplate, openCardModal, userId) {
 
     if (userId !== imageAttr.owner['_id']) {
         deleteButton.remove();
-    }
-    else {
+    } else {
         // Удаление карточки
         deleteButton.addEventListener('click', () => {
             deleteCard(cardElement, imageAttr['_id'])

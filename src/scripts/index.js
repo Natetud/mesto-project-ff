@@ -80,19 +80,18 @@ editButton.addEventListener('click', () => {
     openModal(popupProfile);
 });
 
+function onCardCreatedModal(src, title) {
+    // Обработчик открытия карточки в модальном окне
+    openModalCallback(src, title)
+    const formButton = formCard.querySelector('.popup__button');
+    formButton.textContent = 'Создать'
+}
+
 formCard.addEventListener(
     'submit',
     (e => handleCardCreationFormSubmit(e, formCard, popupNewCard, {
                 onSuccess: (res) => {
-                    applyNewCard(res, cardTemplate, (src, title) => {
-                        // Обработчик открытия карточки в модальном окне
-                        imagePopup.src = src;
-                        imagePopup.alt = title;
-                        paragraphPopup.textContent = title;
-                        openModal(popupImage);
-                        const formButton = formCard.querySelector('.popup__button');
-                        formButton.textContent = 'Создать'
-                    }, placesList, userId)
+                    applyNewCard(res, cardTemplate, onCardCreatedModal, placesList, userId)
                 },
                 onPending: () => {
                     const formButton = formCard.querySelector('.popup__button');

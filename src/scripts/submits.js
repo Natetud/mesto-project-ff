@@ -23,10 +23,12 @@ export function editFormProfile(evt, profileTitle, profileDescription, popupNewC
     evt.preventDefault()
     const {name, description} = evt.target.elements
     onPending()
-    patchUserData(name.value, description.value).then((res) => {
-        setProfileName(profileTitle, profileDescription, res.name, res.about)
-        closeModal(popupNewCard);
-    }).catch(onError)
+    patchUserData(name.value, description.value)
+        .then((res) => {
+            setProfileName(profileTitle, profileDescription, res.name, res.about)
+            closeModal(popupNewCard);
+        })
+        .catch(onError)
 }
 
 export function editProfileAvatar(evt, popupAvatar, profileImage, {onPending, onError}) {
@@ -34,8 +36,10 @@ export function editProfileAvatar(evt, popupAvatar, profileImage, {onPending, on
     const {avatar} = evt.target.elements
     console.log({avatar})
     onPending()
-    patchUserAvatar(avatar.value).then((res) => {
-        setProfileAvatar(profileImage, res.avatar)
-        closeModal(popupAvatar);
-    }).catch(onError)
+    patchUserAvatar(avatar.value)
+        .then((res) => {
+            setProfileAvatar(profileImage, res.avatar)
+            closeModal(popupAvatar);
+        })
+        .catch(onError)
 }
