@@ -3,7 +3,7 @@ import {deleteCardApi, likeCardApi, unlikeCardApi} from "./api";
 export function deleteCard(cardElement, cardId) {
     deleteCardApi(cardId).then(() => {
         cardElement.remove();
-    })
+    }).catch(console.error)
 }
 
 export function likeCard(likeButton, likeCounter, cardId) {
@@ -17,7 +17,7 @@ export function unlikeCard(likeButton, likeCounter, cardId) {
     unlikeCardApi(cardId).then((res) => {
         likeButton.classList.remove('card__like-button_is-active');
         likeCounter.textContent = res.likes.length
-    })
+    }).catch(console.error)
 }
 
 export function createCard(imageAttr, cardTemplate, openCardModal, userId) {

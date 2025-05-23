@@ -1,8 +1,10 @@
 import {closeModal} from "./modal";
-import {applyNewCard, setProfileAvatar, setProfileName} from "./applyInDOM";
+import {setProfileAvatar, setProfileName} from "./applyInDOM";
 import {patchUserAvatar, patchUserData, postCard} from "./api";
 
-export function handleCardCreationFormSubmit(evt, formCard, popupNewCard, createCardCallback, onPending, onError) {
+export function handleCardCreationFormSubmit(evt, formCard, popupNewCard, {
+    onSuccess, onPending, onError
+}) {
     evt.preventDefault();
     const cardInfo =
         {
@@ -12,12 +14,12 @@ export function handleCardCreationFormSubmit(evt, formCard, popupNewCard, create
 
     onPending()
     postCard(cardInfo).then((res) => {
-        createCardCallback(res)
+        onSuccess(res)
         closeModal(popupNewCard);
     }).catch(onError)
 }
 
-export function editFormProfile(evt, profileTitle, profileDescription, popupNewCard, onPending, onError) {
+export function editFormProfile(evt, profileTitle, profileDescription, popupNewCard, {onPending, onError}) {
     evt.preventDefault()
     const {name, description} = evt.target.elements
     onPending()
@@ -27,7 +29,7 @@ export function editFormProfile(evt, profileTitle, profileDescription, popupNewC
     }).catch(onError)
 }
 
-export function editProfileAvatar(evt, popupAvatar, profileImage, onPending, onError) {
+export function editProfileAvatar(evt, popupAvatar, profileImage, {onPending, onError}) {
     evt.preventDefault()
     const {avatar} = evt.target.elements
     console.log({avatar})
